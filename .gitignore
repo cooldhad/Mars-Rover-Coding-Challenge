@@ -1,2 +1,5 @@
 # IDEs and editors
 .idea
+
+# Test coverage reports
+coverage.out
