@@ -8,33 +8,35 @@ import (
 var _ interfaces.Instruct = &handler{}
 
 type handler struct {
-	moveRover    interfaces.Move
+	move         interfaces.Move
 	plateau      domain.Plateau
 	instructions string
 }
 
 func (h handler) Instruct(
-	moveRover interfaces.Move,
+	move interfaces.Move,
 	plateau domain.Plateau,
 	instructions string,
 ) (domain.Position, domain.Direction) {
 	for _, cmd := range instructions {
 		switch cmd {
 		case 'L':
-			moveRover.RotateLeft()
+			move.RotateLeft()
 		case 'R':
-			moveRover.RotateRight()
+			move.RotateRight()
 		case 'M':
-			moveRover.Move(plateau)
+			move.Move(plateau)
+		default:
+			// ensuring that invalid comments are ignored
 		}
 	}
 
-	return moveRover.Get()
+	return move.Get()
 }
 
 func NewRover(moveRover interfaces.Move, plateau domain.Plateau, instructions string) interfaces.Instruct {
 	return &handler{
-		moveRover:    moveRover,
+		move:         moveRover,
 		plateau:      plateau,
 		instructions: instructions,
 	}

@@ -74,6 +74,14 @@ func (suite *InstructTestSuite) TestInstruct() {
 			expectedPos:  domain.Position{X: 2, Y: 2},
 			expectedDir:  domain.South,
 		},
+		{
+			name:         "Rover with invalid instructions hitting the boundary (West)",
+			startPos:     domain.Position{X: 1, Y: 2},
+			startDir:     domain.North,
+			instructions: "LMXZ1LRM", // X, Z, 1 are invalid
+			expectedPos:  domain.Position{X: 0, Y: 2},
+			expectedDir:  domain.West,
+		},
 	}
 
 	for _, tc := range tests {

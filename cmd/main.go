@@ -35,16 +35,27 @@ func main() {
 
 		// Position and direction
 		parts := strings.Fields(line)
-		x, _ := strconv.Atoi(parts[0])
-		y, _ := strconv.Atoi(parts[1])
+		x, err := strconv.Atoi(parts[0])
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error converting xCoordinate to int: %s\n", err)
+			os.Exit(1)
+		}
+		y, err := strconv.Atoi(parts[1])
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error converting yCoordinate to int: %s\n", err)
+			os.Exit(1)
+		}
 		position := domain.Position{
 			X: x,
 			Y: y,
 		}
 		dir := domain.Direction(parts[2])
+		if dir != "N" && dir != "E" && dir != "S" && dir != "W" {
+			_, _ = fmt.Fprintf(os.Stderr, "Error parsing input direction %s\n", dir)
+		}
 		moveRover := move.NewRover(position, dir)
 
-		// Read movement line
+		// Read movement (instructions) line
 		scanner.Scan()
 		instructions := scanner.Text()
 
