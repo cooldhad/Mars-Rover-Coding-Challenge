@@ -1,11 +1,11 @@
-package rovermotion
+package move
 
 import (
 	"Mars-Rover-Coding-Challenge/interfaces"
 	"Mars-Rover-Coding-Challenge/internal/domain"
 )
 
-var _ interfaces.RoverMotion = &handler{}
+var _ interfaces.Move = &handler{}
 
 type handler struct {
 	Position  domain.Position
@@ -66,11 +66,11 @@ func (r *handler) isWithinBounds(position domain.Position, plateau domain.Platea
 		position.Y >= 0 && position.Y <= plateau.Height
 }
 
-func (r *handler) GetRover() (domain.Position, domain.Direction) {
+func (r *handler) Get() (domain.Position, domain.Direction) {
 	return r.Position, r.Direction
 }
 
-func NewRover(pos domain.Position, dir domain.Direction) interfaces.RoverMotion {
+func NewRover(pos domain.Position, dir domain.Direction) interfaces.Move {
 	return &handler{
 		Position:  pos,
 		Direction: dir,

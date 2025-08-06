@@ -2,8 +2,8 @@ package main
 
 import (
 	"Mars-Rover-Coding-Challenge/internal/domain"
-	"Mars-Rover-Coding-Challenge/internal/processinstructions"
-	"Mars-Rover-Coding-Challenge/internal/rovermotion"
+	"Mars-Rover-Coding-Challenge/internal/instruct"
+	"Mars-Rover-Coding-Challenge/internal/move"
 	"bufio"
 	"fmt"
 	"os"
@@ -15,8 +15,16 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	grid := strings.Fields(scanner.Text())
-	width, _ := strconv.Atoi(grid[0])
-	height, _ := strconv.Atoi(grid[1])
+	width, err := strconv.Atoi(grid[0])
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Error converting width to int: %s\n", err)
+		os.Exit(1)
+	}
+	height, err := strconv.Atoi(grid[1])
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Error converting height to int: %s\n", err)
+		os.Exit(1)
+	}
 	plateau := domain.Plateau{Width: width, Height: height}
 
 	for scanner.Scan() {
@@ -34,14 +42,14 @@ func main() {
 			Y: y,
 		}
 		dir := domain.Direction(parts[2])
-		roverMotion := rovermotion.NewRover(position, dir)
+		moveRover := move.NewRover(position, dir)
 
 		// Read movement line
 		scanner.Scan()
 		instructions := scanner.Text()
-		
-		roverInstructions := processinstructions.NewProcessInstructions(roverMotion, plateau, instructions)
-		newPosition, newDirection := roverInstructions.ProcessInstructions(roverMotion, plateau, instructions)
+
+		roverInstructions := instruct.NewRover(moveRover, plateau, instructions)
+		newPosition, newDirection := roverInstructions.Instruct(moveRover, plateau, instructions)
 		fmt.Printf("%d %d %s\n", newPosition.X, newPosition.Y, newDirection)
 	}
 }
