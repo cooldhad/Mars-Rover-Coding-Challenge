@@ -8,5 +8,5 @@ type RoverMotion interface {
 	RotateLeft()
 	RotateRight()
 	Move(plateau domain.Plateau)
-	ProcessInstructions(plateau domain.Plateau, instructions string)
+	GetRover() (domain.Position, domain.Direction)
 }
