@@ -11,8 +11,14 @@ import (
 	"strings"
 )
 
+type RoverInput struct {
+	initialPos   string
+	instructions string
+}
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
+	// reading the plateau
 	scanner.Scan()
 	grid := strings.Fields(scanner.Text())
 	width, err := strconv.Atoi(grid[0])
@@ -27,14 +33,24 @@ func main() {
 	}
 	plateau := domain.Plateau{Width: width, Height: height}
 
+	// collecting all inputs first
+	var inputs []RoverInput
 	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "" {
-			continue
+		posLine := scanner.Text()
+		if posLine == "" {
+			break
 		}
+		scanner.Scan()
+		cmdLine := scanner.Text()
+		inputs = append(inputs, RoverInput{
+			initialPos:   posLine,
+			instructions: cmdLine,
+		})
+	}
 
-		// Position and direction
-		parts := strings.Fields(line)
+	// process each rover after collecting all inputs
+	for _, input := range inputs {
+		parts := strings.Fields(input.initialPos)
 		x, err := strconv.Atoi(parts[0])
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Error converting xCoordinate to int: %s\n", err)
@@ -63,4 +79,5 @@ func main() {
 		newPosition, newDirection := roverInstructions.Instruct(moveRover, plateau, instructions)
 		fmt.Printf("%d %d %s\n", newPosition.X, newPosition.Y, newDirection)
 	}
+
 }
