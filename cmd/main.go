@@ -2,6 +2,7 @@ package main
 
 import (
 	"Mars-Rover-Coding-Challenge/internal/domain"
+	"Mars-Rover-Coding-Challenge/internal/processinstructions"
 	"Mars-Rover-Coding-Challenge/internal/rovermotion"
 	"bufio"
 	"fmt"
@@ -33,13 +34,14 @@ func main() {
 			Y: y,
 		}
 		dir := domain.Direction(parts[2])
-		rover := rovermotion.NewRoverMotionHandler(position, dir)
+		roverMotion := rovermotion.NewRover(position, dir)
 
 		// Read movement line
 		scanner.Scan()
 		instructions := scanner.Text()
-
-		rover.ProcessInstructions(plateau, instructions)
-		fmt.Printf("%d %d %s\n", rover.Position.X, rover.Position.Y, rover.Direction)
+		
+		roverInstructions := processinstructions.NewProcessInstructions(roverMotion, plateau, instructions)
+		newPosition, newDirection := roverInstructions.ProcessInstructions(roverMotion, plateau, instructions)
+		fmt.Printf("%d %d %s\n", newPosition.X, newPosition.Y, newDirection)
 	}
 }
