@@ -1,18 +1,18 @@
-package rovermotion
+package move
 
 import (
 	"Mars-Rover-Coding-Challenge/interfaces"
 	"Mars-Rover-Coding-Challenge/internal/domain"
 )
 
-var _ interfaces.RoverMotion = &MotionHandler{}
+var _ interfaces.Move = &handler{}
 
-type MotionHandler struct {
+type handler struct {
 	Position  domain.Position
 	Direction domain.Direction
 }
 
-func (r *MotionHandler) RotateLeft() {
+func (r *handler) RotateLeft() {
 	switch r.Direction {
 	case domain.North:
 		r.Direction = domain.West
@@ -25,7 +25,7 @@ func (r *MotionHandler) RotateLeft() {
 	}
 }
 
-func (r *MotionHandler) RotateRight() {
+func (r *handler) RotateRight() {
 	switch r.Direction {
 	case domain.North:
 		r.Direction = domain.East
@@ -38,14 +38,14 @@ func (r *MotionHandler) RotateRight() {
 	}
 }
 
-func (r *MotionHandler) Move(plateau domain.Plateau) {
+func (r *handler) Move(plateau domain.Plateau) {
 	newPosition := r.calculateNewPosition()
 	if r.isWithinBounds(newPosition, plateau) {
 		r.Position = newPosition
 	}
 }
 
-func (r *MotionHandler) calculateNewPosition() domain.Position {
+func (r *handler) calculateNewPosition() domain.Position {
 	newPosition := r.Position
 	switch r.Direction {
 	case domain.North:
@@ -61,26 +61,17 @@ func (r *MotionHandler) calculateNewPosition() domain.Position {
 	return newPosition
 }
 
-func (r *MotionHandler) isWithinBounds(position domain.Position, plateau domain.Plateau) bool {
+func (r *handler) isWithinBounds(position domain.Position, plateau domain.Plateau) bool {
 	return position.X >= 0 && position.X <= plateau.Width &&
 		position.Y >= 0 && position.Y <= plateau.Height
 }
 
-func (r *MotionHandler) ProcessInstructions(plateau domain.Plateau, instructions string) {
-	for _, cmd := range instructions {
-		switch cmd {
-		case 'L':
-			r.RotateLeft()
-		case 'R':
-			r.RotateRight()
-		case 'M':
-			r.Move(plateau)
-		}
-	}
+func (r *handler) Get() (domain.Position, domain.Direction) {
+	return r.Position, r.Direction
 }
 
-func NewRoverMotionHandler(pos domain.Position, dir domain.Direction) MotionHandler {
-	return MotionHandler{
+func NewRover(pos domain.Position, dir domain.Direction) interfaces.Move {
+	return &handler{
 		Position:  pos,
 		Direction: dir,
 	}
