@@ -32,20 +32,30 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	// collecting all inputs first
+	// collecting all rover inputs first
 	var inputs []RoverInput
-	for scanner.Scan() {
-		posLine := scanner.Text()
+	roverIndex := 0
+	for {
+		if !scanner.Scan() {
+			break
+		}
+		posLine := strings.TrimSpace(scanner.Text())
 		if posLine == "" {
 			break
 		}
-		scanner.Scan()
-		cmdLine := scanner.Text()
+		// read the corresponding rover's instruction line
+		if !scanner.Scan() {
+			return fmt.Errorf("missing instructions for rover %d", roverIndex)
+		}
+		cmdLine := strings.TrimSpace(scanner.Text())
 		inputs = append(inputs, RoverInput{
+			index:        roverIndex,
 			initialPos:   posLine,
 			instructions: cmdLine,
 		})
+		roverIndex++
 	}
+
 	// process each rover after collecting all inputs
 	for _, input := range inputs {
 		parts := strings.Fields(input.initialPos)
