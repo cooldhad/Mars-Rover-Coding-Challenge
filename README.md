@@ -49,11 +49,13 @@ make build
 ./mars_rover
 ```
 
-Based on the challenge, The first line of input is the upper-right coordinates of the plateau, the lower-left coordinates are assumed to be (0,0).
+Based on the challenge, The first line of input is the upper-right coordinates of the plateau; the lower-left coordinates are assumed to be (0,0).
 
 The rest of the input is information pertaining to the rovers that have been deployed. Each rover has two lines of input. The first line gives the rover's position, and the second line is a series of instructions telling the rover how to explore the plateau.
 
 The position is made up of two integers and a letter separated by spaces, corresponding to the x and y co-ordinates and the rover's orientation.
+To control a rover, NASA sends a simple string of letters. The possible letters are 'L,' 'R' and 'M.' 'L' and 'R' make the rover spin 90 degrees left or right respectively, without moving from its current spot.
+'M' means move forward one grid point and maintain the same heading.
 
 Below is the example of input that you can use:
 
