@@ -3,6 +3,7 @@ package instruct
 import (
 	"Mars-Rover-Coding-Challenge/interfaces"
 	"Mars-Rover-Coding-Challenge/internal/domain"
+	"errors"
 )
 
 var _ interfaces.Instruct = &handler{}
@@ -13,25 +14,28 @@ type handler struct {
 	instructions string
 }
 
-func (h handler) Instruct(
-	move interfaces.Move,
-	plateau domain.Plateau,
-	instructions string,
-) (domain.Position, domain.Direction) {
-	for _, cmd := range instructions {
+func (h handler) Instruct() (domain.Position, domain.Direction, error) {
+	var hasInvalidChar bool
+	for _, cmd := range h.instructions {
 		switch cmd {
 		case 'L':
-			move.RotateLeft()
+			h.move.RotateLeft()
 		case 'R':
-			move.RotateRight()
+			h.move.RotateRight()
 		case 'M':
-			move.Move(plateau)
+			h.move.Move(h.plateau)
 		default:
-			// ensuring that invalid comments are ignored
+			{
+				hasInvalidChar = true
+			}
 		}
 	}
+	pos, dir := h.move.Get()
+	if hasInvalidChar {
+		return pos, dir, domain.AsBadRequestErr(errors.New("incorrect rover instructions, please use L,R,M only"))
+	}
 
-	return move.Get()
+	return pos, dir, nil
 }
 
 func NewRover(moveRover interfaces.Move, plateau domain.Plateau, instructions string) interfaces.Instruct {

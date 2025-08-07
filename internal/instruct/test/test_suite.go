@@ -59,14 +59,6 @@ func (suite *InstructTestSuite) TestInstruct() {
 			expectedDir:  domain.East,
 		},
 		{
-			name:         "Rover hitting boundary (North)",
-			startPos:     domain.Position{Y: 5},
-			startDir:     domain.North,
-			instructions: "MMM",
-			expectedPos:  domain.Position{Y: 5}, // can't go beyond Y=5
-			expectedDir:  domain.North,
-		},
-		{
 			name:         "Rover turning only",
 			startPos:     domain.Position{X: 2, Y: 2},
 			startDir:     domain.South,
@@ -74,22 +66,46 @@ func (suite *InstructTestSuite) TestInstruct() {
 			expectedPos:  domain.Position{X: 2, Y: 2},
 			expectedDir:  domain.South,
 		},
-		{
-			name:         "Rover with invalid instructions hitting the boundary (West)",
-			startPos:     domain.Position{X: 1, Y: 2},
-			startDir:     domain.North,
-			instructions: "LMXZ1LRM", // X, Z, 1 are invalid
-			expectedPos:  domain.Position{X: 0, Y: 2},
-			expectedDir:  domain.West,
-		},
 	}
 
 	for _, tc := range tests {
 		suite.move = move.NewRover(tc.startPos, tc.startDir)
-		actualPos, actualDir := suite.service.Instruct(suite.move, suite.plateau, tc.instructions)
+		suite.service = instruct.NewRover(suite.move, suite.plateau, tc.instructions)
+		actualPos, actualDir, err := suite.service.Instruct()
+		suite.Require().NoError(err)
 		suite.Require().Equal(tc.expectedPos, actualPos)
 		suite.Assert().Equal(tc.expectedDir, actualDir)
 	}
+}
+
+func (suite *InstructTestSuite) TestInstructWhenRoverIsOutOfBounds() {
+	startPos := domain.Position{Y: 5}
+	startDir := domain.North
+	suite.move = move.NewRover(startPos, startDir)
+	suite.instructions = "MMM"
+	suite.service = instruct.NewRover(suite.move, suite.plateau, suite.instructions)
+	expectedPos := domain.Position{Y: 5} // can't go beyond Y=5
+	expectedDir := domain.North
+	actualPos, actualDir, err := suite.service.Instruct()
+	suite.Require().NoError(err)
+	suite.Assert().Equal(expectedPos, actualPos)
+	suite.Assert().Equal(expectedDir, actualDir)
+}
+
+func (suite *InstructTestSuite) TestIncorrectInstructions() {
+	startPos := domain.Position{X: 1, Y: 2}
+	startDir := domain.North
+	suite.move = move.NewRover(startPos, startDir)
+	suite.instructions = "LMXZ1LRM" // X, Z, 1 are invalid
+	suite.service = instruct.NewRover(suite.move, suite.plateau, suite.instructions)
+	expectedPos := domain.Position{X: 0, Y: 2}
+	expectedDir := domain.West
+	actualPos, actualDir, err := suite.service.Instruct()
+	suite.Require().Error(err)
+	suite.Require().True(domain.IsBadRequestErr(err))
+	suite.Require().EqualError(err, "incorrect rover instructions, please use L,R,M only")
+	suite.Assert().Equal(expectedPos, actualPos)
+	suite.Assert().Equal(expectedDir, actualDir)
 }
 
 func Instruct(t *testing.T) {

@@ -12,42 +12,42 @@ type handler struct {
 	Direction domain.Direction
 }
 
-func (r *handler) RotateLeft() {
-	switch r.Direction {
+func (h *handler) RotateLeft() {
+	switch h.Direction {
 	case domain.North:
-		r.Direction = domain.West
+		h.Direction = domain.West
 	case domain.East:
-		r.Direction = domain.North
+		h.Direction = domain.North
 	case domain.South:
-		r.Direction = domain.East
+		h.Direction = domain.East
 	case domain.West:
-		r.Direction = domain.South
+		h.Direction = domain.South
 	}
 }
 
-func (r *handler) RotateRight() {
-	switch r.Direction {
+func (h *handler) RotateRight() {
+	switch h.Direction {
 	case domain.North:
-		r.Direction = domain.East
+		h.Direction = domain.East
 	case domain.East:
-		r.Direction = domain.South
+		h.Direction = domain.South
 	case domain.South:
-		r.Direction = domain.West
+		h.Direction = domain.West
 	case domain.West:
-		r.Direction = domain.North
+		h.Direction = domain.North
 	}
 }
 
-func (r *handler) Move(plateau domain.Plateau) {
-	newPosition := r.calculateNewPosition()
-	if r.isWithinBounds(newPosition, plateau) {
-		r.Position = newPosition
+func (h *handler) Move(plateau domain.Plateau) {
+	newPosition := h.calculateNewPosition()
+	if h.isWithinBounds(newPosition, plateau) {
+		h.Position = newPosition
 	}
 }
 
-func (r *handler) calculateNewPosition() domain.Position {
-	newPosition := r.Position
-	switch r.Direction {
+func (h *handler) calculateNewPosition() domain.Position {
+	newPosition := h.Position
+	switch h.Direction {
 	case domain.North:
 		newPosition.Y++
 	case domain.South:
@@ -61,13 +61,13 @@ func (r *handler) calculateNewPosition() domain.Position {
 	return newPosition
 }
 
-func (r *handler) isWithinBounds(position domain.Position, plateau domain.Plateau) bool {
+func (h *handler) isWithinBounds(position domain.Position, plateau domain.Plateau) bool {
 	return position.X >= 0 && position.X <= plateau.Width &&
 		position.Y >= 0 && position.Y <= plateau.Height
 }
 
-func (r *handler) Get() (domain.Position, domain.Direction) {
-	return r.Position, r.Direction
+func (h *handler) Get() (domain.Position, domain.Direction) {
+	return h.Position, h.Direction
 }
 
 func NewRover(pos domain.Position, dir domain.Direction) interfaces.Move {
