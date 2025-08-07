@@ -73,7 +73,11 @@ func main() {
 		instructions := scanner.Text()
 
 		roverInstructions := instruct.NewRover(moveRover, plateau, instructions)
-		newPosition, newDirection := roverInstructions.Instruct(moveRover, plateau, instructions)
+		newPosition, newDirection, err := roverInstructions.Instruct()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 		fmt.Printf("%d %d %s\n", newPosition.X, newPosition.Y, newDirection)
 	}
 
