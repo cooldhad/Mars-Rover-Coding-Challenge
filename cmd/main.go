@@ -66,9 +66,6 @@ func main() {
 			Y: y,
 		}
 		dir := domain.Direction(parts[2])
-		if dir != "N" && dir != "E" && dir != "S" && dir != "W" {
-			_, _ = fmt.Fprintf(os.Stderr, "Error parsing input direction %s\n", dir)
-		}
 		moveRover := move.NewRover(position, dir)
 
 		// Read movement (instructions) line
