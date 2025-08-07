@@ -12,27 +12,26 @@ import (
 )
 
 type RoverInput struct {
+	index        int
 	initialPos   string
 	instructions string
 }
 
 func main() {
+	if err := run(); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	}
+}
+
+func run() error {
 	scanner := bufio.NewScanner(os.Stdin)
 	// reading the plateau
 	scanner.Scan()
 	grid := strings.Fields(scanner.Text())
-	width, err := strconv.Atoi(grid[0])
+	plateau, err := parsePlateau(grid)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error converting width to int: %s\n", err)
-		os.Exit(1)
+		return err
 	}
-	height, err := strconv.Atoi(grid[1])
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error converting height to int: %s\n", err)
-		os.Exit(1)
-	}
-	plateau := domain.Plateau{Width: width, Height: height}
-
 	// collecting all inputs first
 	var inputs []RoverInput
 	for scanner.Scan() {
@@ -47,38 +46,63 @@ func main() {
 			instructions: cmdLine,
 		})
 	}
-
 	// process each rover after collecting all inputs
 	for _, input := range inputs {
 		parts := strings.Fields(input.initialPos)
-		x, err := strconv.Atoi(parts[0])
+		position, dir, err := parsePositionAndDirection(parts)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Error converting xCoordinate to int: %s\n", err)
-			os.Exit(1)
+			return err
 		}
-		y, err := strconv.Atoi(parts[1])
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Error converting yCoordinate to int: %s\n", err)
-			os.Exit(1)
-		}
-		position := domain.Position{
-			X: x,
-			Y: y,
-		}
-		dir := domain.Direction(parts[2])
 		moveRover := move.NewRover(position, dir)
-
 		// Read movement (instructions) line
-		scanner.Scan()
-		instructions := scanner.Text()
-
+		if !scanner.Scan() {
+			return fmt.Errorf("missing rover instructions")
+		}
+		instructions := strings.TrimSpace(scanner.Text())
 		roverInstructions := instruct.NewRover(moveRover, plateau, instructions)
 		newPosition, newDirection, err := roverInstructions.Instruct()
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
+			return err
 		}
 		fmt.Printf("%d %d %s\n", newPosition.X, newPosition.Y, newDirection)
 	}
 
+	return scanner.Err()
+}
+func parsePlateau(parts []string) (domain.Plateau, error) {
+	if len(parts) != 2 {
+		return domain.Plateau{}, fmt.Errorf("invalid input, expected 2 values, got %d", len(parts))
+	}
+	width, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return domain.Plateau{}, err
+	}
+	height, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return domain.Plateau{}, err
+	}
+	plateau := domain.Plateau{Width: width, Height: height}
+
+	return plateau, nil
+}
+
+func parsePositionAndDirection(parts []string) (domain.Position, domain.Direction, error) {
+	if len(parts) != 3 {
+		return domain.Position{}, "", fmt.Errorf("invalid input, expected 3 values, got %d", len(parts))
+	}
+	x, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return domain.Position{}, "", err
+	}
+	y, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return domain.Position{}, "", err
+	}
+	dir := domain.Direction(parts[2])
+	position := domain.Position{
+		X: x,
+		Y: y,
+	}
+
+	return position, dir, nil
 }
