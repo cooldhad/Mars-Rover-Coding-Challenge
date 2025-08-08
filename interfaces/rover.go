@@ -4,9 +4,10 @@ import (
 	"Mars-Rover-Coding-Challenge/internal/domain"
 )
 
-type Move interface {
+type Rover interface {
 	RotateLeft()
 	RotateRight()
 	Move(plateau domain.Plateau)
-	Get() (domain.Position, domain.Direction)
+	Instruct(plateau domain.Plateau, instructions string) (domain.Rover, error)
+	Get() domain.Rover
 }

@@ -2,8 +2,7 @@ package main
 
 import (
 	"Mars-Rover-Coding-Challenge/internal/domain"
-	"Mars-Rover-Coding-Challenge/internal/instruct"
-	"Mars-Rover-Coding-Challenge/internal/move"
+	"Mars-Rover-Coding-Challenge/internal/rover"
 	"bufio"
 	"fmt"
 	"os"
@@ -12,7 +11,6 @@ import (
 )
 
 type RoverInput struct {
-	index        int
 	initialPos   string
 	instructions string
 }
@@ -34,47 +32,32 @@ func run() error {
 	}
 	// collecting all rover inputs first
 	var inputs []RoverInput
-	roverIndex := 0
-	for {
-		if !scanner.Scan() {
-			break
-		}
-		posLine := strings.TrimSpace(scanner.Text())
+	for scanner.Scan() {
+		posLine := scanner.Text()
 		if posLine == "" {
 			break
 		}
-		// read the corresponding rover's instruction line
-		if !scanner.Scan() {
-			return fmt.Errorf("missing instructions for rover %d", roverIndex)
-		}
-		cmdLine := strings.TrimSpace(scanner.Text())
+		scanner.Scan()
+		cmdLine := scanner.Text()
 		inputs = append(inputs, RoverInput{
-			index:        roverIndex,
 			initialPos:   posLine,
 			instructions: cmdLine,
 		})
-		roverIndex++
 	}
 
 	// process each rover after collecting all inputs
 	for _, input := range inputs {
 		parts := strings.Fields(input.initialPos)
-		position, dir, err := parsePositionAndDirection(parts)
+		startRover, err := parsePositionAndDirection(parts)
 		if err != nil {
 			return err
 		}
-		moveRover := move.NewRover(position, dir)
-		// Read movement (instructions) line
-		if !scanner.Scan() {
-			return fmt.Errorf("missing rover instructions")
-		}
-		instructions := strings.TrimSpace(scanner.Text())
-		roverInstructions := instruct.NewRover(moveRover, plateau, instructions)
-		newPosition, newDirection, err := roverInstructions.Instruct()
+		marsRover := rover.NewRover(startRover)
+		endRover, err := marsRover.Instruct(plateau, input.instructions)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%d %d %s\n", newPosition.X, newPosition.Y, newDirection)
+		fmt.Printf("%d %d %s\n", endRover.Position.X, endRover.Position.Y, endRover.Direction)
 	}
 
 	return scanner.Err()
@@ -96,17 +79,17 @@ func parsePlateau(parts []string) (domain.Plateau, error) {
 	return plateau, nil
 }
 
-func parsePositionAndDirection(parts []string) (domain.Position, domain.Direction, error) {
+func parsePositionAndDirection(parts []string) (domain.Rover, error) {
 	if len(parts) != 3 {
-		return domain.Position{}, "", fmt.Errorf("invalid input, expected 3 values, got %d", len(parts))
+		return domain.Rover{}, fmt.Errorf("invalid input, expected 3 values, got %d", len(parts))
 	}
 	x, err := strconv.Atoi(parts[0])
 	if err != nil {
-		return domain.Position{}, "", err
+		return domain.Rover{}, err
 	}
 	y, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return domain.Position{}, "", err
+		return domain.Rover{}, err
 	}
 	dir := domain.Direction(parts[2])
 	position := domain.Position{
@@ -114,5 +97,8 @@ func parsePositionAndDirection(parts []string) (domain.Position, domain.Directio
 		Y: y,
 	}
 
-	return position, dir, nil
+	return domain.Rover{
+		Position:  position,
+		Direction: dir,
+	}, nil
 }
