@@ -2,8 +2,7 @@ package main
 
 import (
 	"Mars-Rover-Coding-Challenge/internal/domain"
-	"Mars-Rover-Coding-Challenge/internal/instruct"
-	"Mars-Rover-Coding-Challenge/internal/move"
+	"Mars-Rover-Coding-Challenge/internal/rover"
 	"bufio"
 	"fmt"
 	"os"
@@ -63,14 +62,13 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		moveRover := move.NewRover(position, dir)
+		marsRover := rover.NewRover(position, dir)
 		// Read movement (instructions) line
 		if !scanner.Scan() {
 			return fmt.Errorf("missing rover instructions")
 		}
 		instructions := strings.TrimSpace(scanner.Text())
-		roverInstructions := instruct.NewRover(moveRover, plateau, instructions)
-		newPosition, newDirection, err := roverInstructions.Instruct()
+		newPosition, newDirection, err := marsRover.Instruct(plateau, instructions)
 		if err != nil {
 			return err
 		}
