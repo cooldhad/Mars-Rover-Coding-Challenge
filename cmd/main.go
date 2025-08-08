@@ -62,17 +62,20 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		marsRover := rover.NewRover(position, dir)
+		marsRover := rover.NewRover(domain.Rover{
+			Position:  position,
+			Direction: dir,
+		})
 		// Read movement (instructions) line
 		if !scanner.Scan() {
 			return fmt.Errorf("missing rover instructions")
 		}
 		instructions := strings.TrimSpace(scanner.Text())
-		newPosition, newDirection, err := marsRover.Instruct(plateau, instructions)
+		updatedRover, err := marsRover.Instruct(plateau, instructions)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%d %d %s\n", newPosition.X, newPosition.Y, newDirection)
+		fmt.Printf("%d %d %s\n", updatedRover.Position.X, updatedRover.Position.Y, updatedRover.Direction)
 	}
 
 	return scanner.Err()

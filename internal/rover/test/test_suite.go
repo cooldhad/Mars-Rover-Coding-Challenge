@@ -20,7 +20,7 @@ type RoverTestSuite struct {
 }
 
 func (suite *RoverTestSuite) SetupTest() {
-	suite.service = rover.NewRover(domain.Position{}, "")
+	suite.service = rover.NewRover(domain.Rover{})
 	suite.plateau = domain.Plateau{Width: 5, Height: 5}
 }
 
@@ -36,14 +36,14 @@ func (suite *RoverTestSuite) TestRotateRight() {
 	}
 
 	for _, c := range cases {
-		suite.service = rover.NewRover(domain.Position{
-			X: 0,
-			Y: 0,
-		}, c.input)
+		suite.service = rover.NewRover(domain.Rover{
+			Position:  domain.Position{},
+			Direction: c.input,
+		})
 		suite.service.RotateRight()
-		actualPos, actualDir := suite.service.Get()
-		suite.Require().Equal(c.expected, actualDir)
-		suite.Assert().Equal(domain.Position{}, actualPos)
+		updatedRover := suite.service.Get()
+		suite.Require().Equal(c.expected, updatedRover.Direction)
+		suite.Assert().Equal(domain.Position{}, updatedRover.Position)
 	}
 }
 
@@ -59,14 +59,14 @@ func (suite *RoverTestSuite) TestRotateLeft() {
 	}
 
 	for _, c := range cases {
-		suite.service = rover.NewRover(domain.Position{
-			X: 0,
-			Y: 0,
-		}, c.input)
+		suite.service = rover.NewRover(domain.Rover{
+			Position:  domain.Position{},
+			Direction: c.input,
+		})
 		suite.service.RotateLeft()
-		actualPos, actualDir := suite.service.Get()
-		suite.Require().Equal(c.expected, actualDir)
-		suite.Assert().Equal(domain.Position{}, actualPos)
+		updatedRover := suite.service.Get()
+		suite.Require().Equal(c.expected, updatedRover.Direction)
+		suite.Assert().Equal(domain.Position{}, updatedRover.Position)
 	}
 }
 
@@ -88,11 +88,14 @@ func (suite *RoverTestSuite) TestMove() {
 	}
 
 	for _, t := range tests {
-		suite.service = rover.NewRover(t.startPos, t.dir)
+		suite.service = rover.NewRover(domain.Rover{
+			Position:  t.startPos,
+			Direction: t.dir,
+		})
 		suite.service.Move(plateau)
-		actualPos, actualDir := suite.service.Get()
-		suite.Require().Equal(t.expectedPos, actualPos)
-		suite.Assert().Equal(t.dir, actualDir)
+		updatedRover := suite.service.Get()
+		suite.Require().Equal(t.expectedPos, updatedRover.Position)
+		suite.Assert().Equal(t.dir, updatedRover.Direction)
 	}
 }
 
@@ -113,11 +116,14 @@ func (suite *RoverTestSuite) TestMoveOutOfBounds() {
 	}
 
 	for _, t := range tests {
-		suite.service = rover.NewRover(t.start, t.dir)
+		suite.service = rover.NewRover(domain.Rover{
+			Position:  t.start,
+			Direction: t.dir,
+		})
 		suite.service.Move(plateau)
-		actualPos, actualDir := suite.service.Get()
-		suite.Require().Equal(t.expected, actualPos)
-		suite.Assert().Equal(t.dir, actualDir)
+		updatedRover := suite.service.Get()
+		suite.Require().Equal(t.expected, updatedRover.Position)
+		suite.Assert().Equal(t.dir, updatedRover.Direction)
 	}
 }
 
@@ -157,39 +163,48 @@ func (suite *RoverTestSuite) TestInstruct() {
 	}
 
 	for _, tc := range tests {
-		suite.service = rover.NewRover(tc.startPos, tc.startDir)
-		actualPos, actualDir, err := suite.service.Instruct(suite.plateau, tc.instructions)
+		suite.service = rover.NewRover(domain.Rover{
+			Position:  tc.startPos,
+			Direction: tc.startDir,
+		})
+		updatedRover, err := suite.service.Instruct(suite.plateau, tc.instructions)
 		suite.Require().NoError(err)
-		suite.Require().Equal(tc.expectedPos, actualPos)
-		suite.Assert().Equal(tc.expectedDir, actualDir)
+		suite.Require().Equal(tc.expectedPos, updatedRover.Position)
+		suite.Assert().Equal(tc.expectedDir, updatedRover.Direction)
 	}
 }
 
 func (suite *RoverTestSuite) TestInstructWhenRoverIsOutOfBounds() {
 	startPos := domain.Position{Y: 5}
 	startDir := domain.North
-	suite.service = rover.NewRover(startPos, startDir)
+	suite.service = rover.NewRover(domain.Rover{
+		Position:  startPos,
+		Direction: startDir,
+	})
 	expectedPos := domain.Position{Y: 5} // can't go beyond Y=5
 	expectedDir := domain.North
-	actualPos, actualDir, err := suite.service.Instruct(suite.plateau, "MMM")
+	updatedRover, err := suite.service.Instruct(suite.plateau, "MMM")
 	suite.Require().NoError(err)
-	suite.Assert().Equal(expectedPos, actualPos)
-	suite.Assert().Equal(expectedDir, actualDir)
+	suite.Assert().Equal(expectedPos, updatedRover.Position)
+	suite.Assert().Equal(expectedDir, updatedRover.Direction)
 }
 
 func (suite *RoverTestSuite) TestIncorrectInstructions() {
 	startPos := domain.Position{X: 1, Y: 2}
 	startDir := domain.North
-	suite.service = rover.NewRover(startPos, startDir)
+	suite.service = rover.NewRover(domain.Rover{
+		Position:  startPos,
+		Direction: startDir,
+	})
 	instructions := "LMXZ1LRM" // X, Z, 1 are invalid
 	expectedPos := domain.Position{X: 0, Y: 2}
 	expectedDir := domain.West
-	actualPos, actualDir, err := suite.service.Instruct(suite.plateau, instructions)
+	updatedRover, err := suite.service.Instruct(suite.plateau, instructions)
 	suite.Require().Error(err)
 	suite.Require().True(domain.IsBadRequestErr(err))
 	suite.Require().EqualError(err, "incorrect rover instructions, please use L,R,M only")
-	suite.Assert().Equal(expectedPos, actualPos)
-	suite.Assert().Equal(expectedDir, actualDir)
+	suite.Assert().Equal(expectedPos, updatedRover.Position)
+	suite.Assert().Equal(expectedDir, updatedRover.Direction)
 }
 
 func Rover(t *testing.T) {

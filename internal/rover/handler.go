@@ -9,46 +9,45 @@ import (
 var _ interfaces.Rover = &rover{}
 
 type rover struct {
-	Position  domain.Position
-	Direction domain.Direction
+	marsRover domain.Rover
 }
 
 func (r *rover) RotateLeft() {
-	switch r.Direction {
+	switch r.marsRover.Direction {
 	case domain.North:
-		r.Direction = domain.West
+		r.marsRover.Direction = domain.West
 	case domain.East:
-		r.Direction = domain.North
+		r.marsRover.Direction = domain.North
 	case domain.South:
-		r.Direction = domain.East
+		r.marsRover.Direction = domain.East
 	case domain.West:
-		r.Direction = domain.South
+		r.marsRover.Direction = domain.South
 	}
 }
 
 func (r *rover) RotateRight() {
-	switch r.Direction {
+	switch r.marsRover.Direction {
 	case domain.North:
-		r.Direction = domain.East
+		r.marsRover.Direction = domain.East
 	case domain.East:
-		r.Direction = domain.South
+		r.marsRover.Direction = domain.South
 	case domain.South:
-		r.Direction = domain.West
+		r.marsRover.Direction = domain.West
 	case domain.West:
-		r.Direction = domain.North
+		r.marsRover.Direction = domain.North
 	}
 }
 
 func (r *rover) Move(plateau domain.Plateau) {
 	newPosition := r.calculateNewPosition()
 	if r.isWithinBounds(newPosition, plateau) {
-		r.Position = newPosition
+		r.marsRover.Position = newPosition
 	}
 }
 
 func (r *rover) calculateNewPosition() domain.Position {
-	newPosition := r.Position
-	switch r.Direction {
+	newPosition := r.marsRover.Position
+	switch r.marsRover.Direction {
 	case domain.North:
 		newPosition.Y++
 	case domain.South:
@@ -67,7 +66,7 @@ func (r *rover) isWithinBounds(position domain.Position, plateau domain.Plateau)
 		position.Y >= 0 && position.Y <= plateau.Height
 }
 
-func (r *rover) Instruct(plateau domain.Plateau, instructions string) (domain.Position, domain.Direction, error) {
+func (r *rover) Instruct(plateau domain.Plateau, instructions string) (domain.Rover, error) {
 	var hasInvalidChar bool
 	for _, cmd := range instructions {
 		switch cmd {
@@ -84,19 +83,18 @@ func (r *rover) Instruct(plateau domain.Plateau, instructions string) (domain.Po
 		}
 	}
 	if hasInvalidChar {
-		return r.Position, r.Direction, domain.AsBadRequestErr(errors.New("incorrect rover instructions, please use L,R,M only"))
+		return r.marsRover, domain.AsBadRequestErr(errors.New("incorrect rover instructions, please use L,R,M only"))
 	}
 
-	return r.Position, r.Direction, nil
+	return r.marsRover, nil
 }
 
-func (r *rover) Get() (domain.Position, domain.Direction) {
-	return r.Position, r.Direction
+func (r *rover) Get() domain.Rover {
+	return r.marsRover
 }
 
-func NewRover(pos domain.Position, dir domain.Direction) interfaces.Rover {
+func NewRover(marsRover domain.Rover) interfaces.Rover {
 	return &rover{
-		Position:  pos,
-		Direction: dir,
+		marsRover: marsRover,
 	}
 }
