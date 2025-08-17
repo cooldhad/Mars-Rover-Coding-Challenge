@@ -12,30 +12,27 @@ type handler struct {
 	marsRover domain.Rover
 }
 
-func (h *handler) RotateLeft() {
-	switch h.marsRover.Direction {
-	case domain.North:
-		h.marsRover.Direction = domain.West
-	case domain.East:
-		h.marsRover.Direction = domain.North
-	case domain.South:
-		h.marsRover.Direction = domain.East
-	case domain.West:
-		h.marsRover.Direction = domain.South
+var (
+	leftOf = map[domain.Direction]domain.Direction{
+		domain.North: domain.West,
+		domain.West:  domain.South,
+		domain.South: domain.East,
+		domain.East:  domain.North,
 	}
+	rightOf = map[domain.Direction]domain.Direction{
+		domain.North: domain.East,
+		domain.East:  domain.South,
+		domain.South: domain.West,
+		domain.West:  domain.North,
+	}
+)
+
+func (h *handler) RotateLeft() {
+	h.marsRover.Direction = leftOf[h.marsRover.Direction]
 }
 
 func (h *handler) RotateRight() {
-	switch h.marsRover.Direction {
-	case domain.North:
-		h.marsRover.Direction = domain.East
-	case domain.East:
-		h.marsRover.Direction = domain.South
-	case domain.South:
-		h.marsRover.Direction = domain.West
-	case domain.West:
-		h.marsRover.Direction = domain.North
-	}
+	h.marsRover.Direction = rightOf[h.marsRover.Direction]
 }
 
 func (h *handler) Move(plateau domain.Plateau) {
